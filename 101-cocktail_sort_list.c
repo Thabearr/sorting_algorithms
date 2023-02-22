@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "sort.h"
 
 /* Doubly linked list node */
 typedef struct listint_s {
