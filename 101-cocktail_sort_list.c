@@ -1,101 +1,90 @@
 #include "sort.h"
-
 /**
- * swap_tail - function to swap list
- *@list: list to be swapped
- *@head: head of list
- *@tail: tail of list
- *
- * Return - void
- */
-void swap_tail(listint_t **list, listint_t **head, listint_t **tail)
+*swap - swaps 2 nodes in a doubly-linked list
+*@a: address of first node
+*@b: address of second node
+*
+*Return: void
+*/
+void swap(listint_t *a, listint_t *b)
 {
-	listint_t *temp = (*tail)->next;
-
-	if ((*tail)->prev != NULL)
+	if (a->prev)
+		a->prev->next = b;
+	if (b->next)
+		b->next->prev = a;
+	a->next = b->next;
+	b->prev = a->prev;
+	a->prev = b;
+	b->next = a;
+}
+/**
+*tail_traverse- function that sorts from the tail back
+*
+*@head: head of list
+*@tail: tail of the list
+*@list: original head of the list
+*
+*Return: new head of the list
+*/
+listint_t *tail_traverse(listint_t *head, listint_t *tail, listint_t *list)
+{
+	while (tail && tail->prev)
 	{
-		(*tail)->prev->next = temp;
+		if (tail->n < tail->prev->n)
+		{
+			swap(tail->prev, tail);
+			if (tail->prev == NULL)
+				list = tail;
+			print_list(list);
+		}
+		else
+			tail = tail->prev;
+		if (tail->prev == NULL)
+			head = tail;
 	}
-	else
-		*list = temp;
-	temp->prev = (*tail)->prev;
-	(*tail)->next = temp->next;
-	if (temp->next != NULL)
-	{
-		temp->next->prev = *tail;
-	}
-	else
-		*head = *tail;
-	(*tail)->prev = temp;
-	temp->next = *tail;
-	*tail = temp;
+	return (head);
 }
 
 /**
- * swap_head - function to swap head of linked list
- *@list: doubly linked list to be sorted
- *@tail: tail of double linked list
- *@head: head of double linked list
- * Return - void
- */
-void swap_head(listint_t **list, listint_t **tail, listint_t **head)
-{
-	listint_t *temp = (*head)->prev;
-
-	if ((*head)->prev != NULL)
-		(*head)->next->prev = temp;
-	else
-		*tail = temp;
-	temp->next = (*head)->next;
-	(*head)->prev = temp->prev;
-	if (temp->prev != NULL)
-	{
-		temp->prev->next = *head;
-	}
-	else
-		*list = *head;
-	(*head)->next = temp;
-	temp->prev = *head;
-	*head = temp;
-}
-
-/**
- * cocktail_sort_list - function to sort doubly linked list w/ cocktail sort
- *@list: list to be sorted
- * Return - void
- */
+*cocktail_sort_list - sorts linked list using cocktail shaker sort
+*
+*@list: doubly linked list to be sorted
+*/
 void cocktail_sort_list(listint_t **list)
 {
-	bool booln = false;
-	listint_t *head;
-	listint_t *tail;
+	listint_t *tail, *head, *len;
+	int i = 0, j = 0, swaped = 1;
 
-	if (list == NULL || *list == NULL || (*list)->next == NULL)
+	if (!list || !*list)
 		return;
-	for (tail = *list; tail->next != NULL;)
+	len = *list;
+	for (i = 0; len; i++)
 	{
-		tail = tail->next;
+		len = len->next;
 	}
-	while (booln == false)
+	if (i < 2)
+		return;
+	head = *list;
+	while (j < i)
 	{
-		booln = true;
-		for (head = *list; head != tail; head = head->next)
+		swaped = 0;
+		while (head && head->next)
 		{
 			if (head->n > head->next->n)
 			{
-				swap_tail(list, &tail, &head);
-				print_list((const listint_t *) *list);
-				booln = false;
+				swap(head, head->next);
+				swaped++;
+				if (head->prev->prev == NULL)
+					*list = head->prev;
+				print_list(*list);
 			}
+			else
+				head = head->next;
+			if (head->next == NULL)
+				tail = head;
 		}
-		for (head = head->prev; head != *list; head = head->prev)
-		{
-			if (head->n < head->prev->n)
-			{
-				swap_head(list, &tail, &head);
-				print_list((const listint_t *) *list);
-				booln = false;
-			}
-		}
+		head = tail_traverse(head, tail, *list);
+		*list = head;
+		j++;
 	}
 }
