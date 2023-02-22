@@ -1,55 +1,83 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "sort.h"
+#include <stdio.h>
 
 /**
- * create_listint - Creates a doubly linked list from an array of integers
+ * cocktail_sort_list - Sorts a doubly linked list of integers in ascending order
+ *                      using the Cocktail shaker sort algorithm.
  *
- * @array: Array to convert to a doubly linked list
- * @size: Size of the array
- *
- * Return: Pointer to the first element of the created list. NULL on failure
+ * @list: Pointer to the head of the list.
  */
-listint_t *create_listint(const int *array, size_t size)
+void cocktail_sort_list(listint_t **list)
 {
-    listint_t *list;
-    listint_t *node;
-    int *tmp;
+    listint_t *start = *list, *end, *tmp;
+    int swapped = 1;
 
-    list = NULL;
-    while (size--)
+    if (list == NULL || *list == NULL || (*list)->next == NULL)
+        return;
+
+    while (swapped)
     {
-        node = malloc(sizeof(*node));
-        if (!node)
-            return (NULL);
-        tmp = (int *)&node->n;
-        *tmp = array[size];
-        node->next = list;
-        node->prev = NULL;
-        list = node;
-        if (list->next)
-            list->next->prev = list;
+        swapped = 0;
+        for (end = start; end->next != NULL; end = end->next)
+        {
+            if (end->n > end->next->n)
+            {
+                if (end->prev != NULL)
+                    end->prev->next = end->next;
+                else
+                    *list = end->next;
+                end->next->prev = end->prev;
+                end->prev = end->next;
+                end->next = end->next->next;
+                end->prev->next = end;
+                if (end->next != NULL)
+                    end->next->prev = end;
+                swapped = 1;
+                print_list(*list);
+            }
+        }
+        if (!swapped)
+            break;
+        swapped = 0;
+        for (end = end->prev; end->prev != NULL; end = end->prev)
+        {
+            if (end->n < end->prev->n)
+            {
+                if (end->next != NULL)
+                    end->next->prev = end->prev;
+                else
+                    tmp = end;
+                end->prev->next = end->next;
+                end->next = end->prev;
+                end->prev = end->prev->prev;
+                end->next->prev = end;
+                if (end->prev != NULL)
+                    end->prev->next = end;
+                else
+                    *list = end;
+                swapped = 1;
+                print_list(*list);
+            }
+        }
+        start = tmp;
     }
-    return (list);
 }
-
 /**
- * main - Entry point
+ * print_list - Prints a list of integers
  *
- * Return: Always 0
+ * @list: Pointer to the head of the list
  */
-int main(void)
+void print_list(const listint_t *list)
 {
-    listint_t *list;
-    int array[] = {19, 48, 99, 71, 13, 52, 96, 73, 86, 7};
-    size_t n = sizeof(array) / sizeof(array[0]);
+    const listint_t *node;
 
-    list = create_listint(array, n);
-    if (!list)
-        return (1);
-    print_list(list);
+    node = list;
+    while (node != NULL)
+    {
+        printf("%d", node->n);
+        node = node->next;
+        if (node != NULL)
+            printf(", ");
+    }
     printf("\n");
-    cocktail_sort_list(&list);
-    printf("\n");
-    print_list(list);
-    return (0);
+}
